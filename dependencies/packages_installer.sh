@@ -60,6 +60,20 @@ if [[ "$os_distro" == '"Ubuntu"' ]]; then
     else
         echo -e "PACKAGES_INSTALLER.SH: Skip generic packages installation."
     fi
+
+    # Install runtime dependencies
+    echo -e "\nPACKAGES_INSTALLER.SH: Do you want to install runtime RT snaps?"
+    while [[ ${runtime_dependencies_installation^} != Y && ${runtime_dependencies_installation^} != N ]];
+    do
+        echo -e "Enter [Y]es to proceed installation, [N]o to skip:"; read runtime_dependencies_installation
+    done
+
+    if [[ ${runtime_dependencies_installation^} == Y ]]; then
+        install_runtime_dependencies
+        sleep 3
+    else
+        echo -e "PACKAGES_INSTALLER.SH: Skip runtime dependencies installation."
+    fi
 fi
 
 # Check whether the kernel support XDP_TBS
@@ -252,6 +266,10 @@ install_generic_packages() {
     package="xterm"
     package_installation
 
+    # Check for linuxptp
+    package="linuxptp"
+    package_installation
+
 }
 
 package_installation() {
@@ -277,6 +295,35 @@ package_installation() {
     echo -e "\n===== $package ====="
     echo -e "Package Version: $package_ver\n"
 
+}
+
+install_runtime_dependencies(){
+    # Install snap RT packages
+    echo -e "\n============================================="
+    echo -e "PACKAGES_INSTALLER.SH: Installing RT Snaps"
+    echo -e "============================================="
+
+    # Install iproute2-rt
+    echo -e "\nInstalling iproute2-rt..."
+    snap install iproute2-rt --edge
+    echo -e "Creating alias for iproute2-rt as ip..."
+    snap alias iproute2-rt.ip ip
+    echo -e "Connecting iproute2-rt to network-observe and network-control..."
+    snap connect iproute2-rt:network-observe
+    snap connect iproute2-rt:network-control
+    echo -e "Creating symlink for iproute2-rt to take precedence over regular iproute..."
+    ln -s /snap/bin/ip /usr/local/bin/ip
+
+    # Install iproute2-rt
+    echo -e "\nInstalling ethtool-rt..."
+    snap install ethtool-rt --edge
+    echo -e "Creating alias for ethtool-rt as ethtool..."
+    snap alias ethtool-rt.ethtool ethtool
+    echo -e "Connecting ethtool-rt to network-observe and network-control..."
+    snap connect ethtool-rt:network-observe
+    snap connect ethtool-rt:network-control
+    echo -e "Creating symlink for ethtool-rt to take precedence over regular ethtool..."
+    ln -s /snap/bin/ethtool /usr/local/bin/ethtool
 }
 
 install_libbpf() {
