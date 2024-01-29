@@ -270,6 +270,10 @@ install_generic_packages() {
     package="linuxptp"
     package_installation
 
+    # Check for ipferf3
+    package="iperf3"
+    package_installation
+
 }
 
 package_installation() {

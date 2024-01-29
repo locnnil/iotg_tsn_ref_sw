@@ -199,6 +199,7 @@ WARNING: You are able to install libbpf & open62541 without the 'txtime' descrip
 	* libjson-c-dev
 	* xterm
   * linuxptp
+  * iperf3
 
 NOTE: ensure your proxy settings are correct.
 NOTE: All the packages can be install by using the packages_installer.sh above.
